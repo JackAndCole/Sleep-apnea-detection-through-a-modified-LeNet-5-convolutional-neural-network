@@ -14,7 +14,3 @@ Sleep apnea (SA) is the most common respiratory sleep disorder, leading to some 
 If our work is helpful to you, please cite:
 
 Wang T, Lu C, Shen G, et al. Sleep apnea detection from a single-lead ECG signal with automatic feature-extraction through a modified LeNet-5 convolutional neural network[J]. PeerJ, 2019, 7: e7731. [https://doi.org/10.7717/peerj.7731](https://doi.org/10.7717/peerj.7731)
-
-## Email:
-
-If you have any questions, please email to: wtustc@mail.ustc.edu.cn
