@@ -1,4 +1,5 @@
 import pickle
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import biosppy.signals.tools as st
@@ -7,6 +8,8 @@ import os
 import wfdb
 from biosppy.signals.ecg import correct_rpeaks, hamilton_segmenter
 from scipy.signal import medfilt
+from sklearn.utils import cpu_count
+from tqdm import tqdm
 
 # PhysioNet Apnea-ECG dataset
 # url: https://physionet.org/physiobank/database/apnea-ecg/
@@ -20,24 +23,23 @@ after = 2  # backward interval (min)
 hr_min = 20
 hr_max = 300
 
-num_worker = 35  # Setting according to the number of CPU cores
+num_worker = 35 if cpu_count() > 35 else cpu_count() - 1  # Setting according to the number of CPU cores
 
 
 def worker(name, labels):
-    print("processing %s!" % name)
     X = []
     y = []
     groups = []
-    signals = wfdb.rdrecord(os.path.join(base_dir, name), channels=[0]).p_signal[:, 0] # Read recording
-    for j in range(len(labels)):
+    signals = wfdb.rdrecord(os.path.join(base_dir, name), channels=[0]).p_signal[:, 0]
+    for j in tqdm(range(len(labels)), desc=name, file=sys.stdout):
         if j < before or \
                 (j + 1 + after) > len(signals) / float(sample):
             continue
         signal = signals[int((j - before) * sample):int((j + 1 + after) * sample)]
         signal, _, _ = st.filter_signal(signal, ftype='FIR', band='bandpass', order=int(0.3 * fs),
-                                        frequency=[3, 45], sampling_rate=fs) # Filtering the ecg signal to remove noise
+                                        frequency=[3, 45], sampling_rate=fs)
         # Find R peaks
-        rpeaks, = hamilton_segmenter(signal, sampling_rate=fs) # Extract R-peaks
+        rpeaks, = hamilton_segmenter(signal, sampling_rate=fs)
         rpeaks, = correct_rpeaks(signal, rpeaks=rpeaks, sampling_rate=fs, tol=0.1)
         if len(rpeaks) / (1 + after + before) < 40 or \
                 len(rpeaks) / (1 + after + before) > 200:  # Remove abnormal R peaks signal
@@ -53,14 +55,12 @@ def worker(name, labels):
             X.append([(rri_tm, rri_signal), (ampl_tm, ampl_siganl)])
             y.append(0. if labels[j] == 'N' else 1.)
             groups.append(name)
-    print("over %s!" % name)
     return X, y, groups
 
 
 if __name__ == "__main__":
     apnea_ecg = {}
 
-	# training dataset
     names = [
         "a01", "a02", "a03", "a04", "a05", "a06", "a07", "a08", "a09", "a10",
         "a11", "a12", "a13", "a14", "a15", "a16", "a17", "a18", "a19", "a20",
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     y_train = []
     groups_train = []
     print('Training...')
-    with ProcessPoolExecutor(max_workers=num_worker) as executor: # Speed up with parallel processing
+    with ProcessPoolExecutor(max_workers=num_worker) as executor:
         task_list = []
         for i in range(len(names)):
             labels = wfdb.rdann(os.path.join(base_dir, names[i]), extension="apn").symbol
@@ -91,7 +91,6 @@ if __name__ == "__main__":
         for answer in f.read().split("\n\n"):
             answers[answer[:3]] = list("".join(answer.split()[2::2]))
 
-	# testing dataset
     names = [
         "x01", "x02", "x03", "x04", "x05", "x06", "x07", "x08", "x09", "x10",
         "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20",
@@ -103,7 +102,7 @@ if __name__ == "__main__":
     y_test = []
     groups_test = []
     print("Testing...")
-    with ProcessPoolExecutor(max_workers=num_worker) as executor: # Speed up with parallel processing
+    with ProcessPoolExecutor(max_workers=num_worker) as executor:
         task_list = []
         for i in range(len(names)):
             labels = answers[names[i]]
@@ -115,7 +114,6 @@ if __name__ == "__main__":
             y_test.extend(y)
             groups_test.extend(groups)
 
-	# Save preprocessing result
     apnea_ecg = dict(o_train=o_train, y_train=y_train, groups_train=groups_train, o_test=o_test, y_test=y_test,
                      groups_test=groups_test)
     with open(os.path.join(base_dir, "apnea-ecg.pkl"), "wb") as f:
