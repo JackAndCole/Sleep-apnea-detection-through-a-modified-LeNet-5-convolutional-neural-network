@@ -121,7 +121,7 @@ if __name__ == "__main__":
     lr_scheduler = LearningRateScheduler(lr_schedule) # Dynamic adjustment learning rate
     history = model.fit(x_train, y_train, batch_size=128, epochs=100, validation_data=(x_test, y_test),
                         callbacks=[lr_scheduler])
-    model.save(os.path.join("model", "model.final.h5")) # Save training model
+    model.save(os.path.join("models", "model.final.h5")) # Save training model
 
     loss, accuracy = model.evaluate(x_test, y_test) # test the model
     print("Test loss: ", loss)
