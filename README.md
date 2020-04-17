@@ -8,9 +8,25 @@ Sleep apnea (SA) is the most common respiratory sleep disorder, leading to some 
 
 [apnea-ecg](https://physionet.org/content/apnea-ecg/1.0.0/), [event-1-answers](dataset/event-1-answers), [event-2-answers](dataset/event-2-answers)
 
+## Usage
+
+- Reproduce the results
+
+> A pre-trained model is provided in the model directory. To reproduce our results, you should, first, download the Apnea-ecg database from the above link and save it in the dataset directory. Then, execute  `Preprocessing.py` to obtain the training and test dataset. After that, just run `Pre-training.py` and you will get the results of our paper.
+
+- Re-train the model
+
+> Just replace the last step of run `Pre-training.py` with `LeNet.py`.
+>
+> Noted that the optimization function of Keras and TensorFlow is slightly different in different versions. Therefore, to reproduce our results, it suggests that using the same version of Keras and TensorFlow as us, in our work the version of Keras is  2.3.1 and TensorFlow is 1.15.0. In addition, Keras and TensorFlow have a certain randomness, the actual results may be somewhat floating.  
+
 
 ## Cite
 
 If our work is helpful to you, please cite:
 
 Wang T, Lu C, Shen G, et al. Sleep apnea detection from a single-lead ECG signal with automatic feature-extraction through a modified LeNet-5 convolutional neural network[J]. PeerJ, 2019, 7: e7731. [https://doi.org/10.7717/peerj.7731](https://doi.org/10.7717/peerj.7731)
+
+## Email:
+
+If you have any questions, please email to: [wtustc@mail.ustc.edu.cn](mailto:wtustc@mail.ustc.edu.cn)
