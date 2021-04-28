@@ -22,6 +22,11 @@ Sleep apnea (SA) is the most common respiratory sleep disorder, leading to some 
 >
 > Noted that the optimization function of Keras and TensorFlow is slightly different in different versions. Therefore, to reproduce our results, it suggests that using the same version of Keras and TensorFlow as us, in our work the version of Keras is  2.3.1 and TensorFlow is 1.15.0. In addition, Keras and TensorFlow have a certain randomness, the actual results may be somewhat floating.  
 
+## Requirements
+
+Python==2.7
+Keras==2.3
+Tensorflow==2.1
 
 ## Cite
 
